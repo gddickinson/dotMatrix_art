@@ -63,3 +63,7 @@ dotMatrix_art/
 │   └── dot_matrix_example.png  # Example output
 └── README.md
 ```
+
+
+---
+*Built with AI assistance from [Claude (Anthropic)](https://claude.com/).*
