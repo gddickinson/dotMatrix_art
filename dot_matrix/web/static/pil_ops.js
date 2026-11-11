@@ -1,5 +1,5 @@
 // Pure-JS port of the Pillow 13 operations the converter uses (no DOM): RGB->L, 3x3 kernel filters, blend/enhance,
-// Gaussian blur (extended box blur), LANCZOS/BICUBIC resampling and NEAREST resize. Images are
+// Gaussian blur (extended box blur), posterize/point/multiply, LANCZOS/BICUBIC resampling and NEAREST resize. Images are
 // { w, h, c, data: Uint8Array } with c = 3 (RGB) or 1 (L). Ported from Pillow's C sources (Filter.c, Blend.c,
 // BoxBlur.c, Resample.c, Geometry.c, Convert.c); float32 steps use Math.fround like the C code.
 // Tested against Pillow output in dm_engine.test.mjs.

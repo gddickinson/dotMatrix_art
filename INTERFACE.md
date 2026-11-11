@@ -31,7 +31,7 @@
 | `web/app.py` | FastAPI app: front end, `GET /api/info`, `/api/demo`, `POST /api/convert`, `/api/palette`; `STATIC_ENDPOINTS` |
 | `web/convert_api.py` | Parameter parsing/validation and JSON encoding around the real converter (`parse_params`, `convert`, `svg_text`, `info`, `demo`) |
 | `web/static/index.html`, `style.css`, `style_app.css`, `core.js`, `main.js` | Page shell, shared kit theme + project colours, router, entry point |
-| `web/static/pil_ops.js` | JS port of the Pillow ops used (RGB->L, 3x3 filters, blend/enhance, Gaussian blur, LANCZOS/BICUBIC/NEAREST resize) |
+| `web/static/pil_ops.js` | JS port of the Pillow ops used (RGB->L, 3x3 filters, blend/enhance, Gaussian blur, posterize, point, multiply, LANCZOS/BICUBIC/NEAREST resize) |
 | `web/static/dm_engine.js` | JS port of preprocess/effects, `sampleMatrix`, `computeDots`, `extractDominantColors` |
 | `web/static/dm_shapes.js` | Pattern shapes as draw primitives, canvas drawing, SVG (desktop circle format + shapes) |
 | `web/static/dm_engine.test.mjs` | Node test: JS port vs `tests/fixtures/dm_fixture.json` |
@@ -46,7 +46,7 @@
 - `.github/workflows/pages.yml` -- tests, builds and publishes the static site on push to `main`
 
 ## Tests
-- `test_patterns.py` -- Smoke tests for patterns, effects, palettes, undo/redo, SVG export, non-RGB inputs
+- `test_patterns.py` -- Smoke tests for patterns, effects, palettes, undo/redo, SVG export, non-RGB inputs, EXIF, small faces
 - `tests/test_web.py` -- Web API, static build, fixture currency, and the node JS-engine test
 - `tests/test_browser.py` -- Playwright check that the browser decodes an EXIF-rotated JPEG upright (skipped without Playwright)
 - `tests/exif_sample.py` -- builds the rotated test JPEG used by both

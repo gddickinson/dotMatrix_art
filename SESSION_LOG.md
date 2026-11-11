@@ -20,6 +20,18 @@
   - `__pycache__/*.pyc` were tracked in git; untracked and ignored.
 - Docs: README usage/structure corrected (app.py + dot_matrix/, v1/v2 in _archive/); noted that Watercolor, Comic,
   Sepia and Depth 3D effects are listed but not implemented.
-- Open for George: implement or remove the four no-op effects; desktop app does not apply EXIF orientation (phone
-  photos may appear sideways; the web app does apply it); `FaceGenerator.create_test_face` fails for sizes below
-  about 40 px (not reachable from the GUI).
+- Open questions were answered by George the same day (see next entry).
+
+## 2026-11-11 (later): follow-up fixes approved by George
+- Implemented the four menu effects that did nothing (Python effects.py + JS dm_engine.js, fixture extended, node test
+  4563/4563 exact): Sepia (sepia matrix), Watercolor (Gaussian blur 2, posterize 4 bits, colour x1.3), Comic
+  (smoothed 2-bit poster colours x black ink mask where FIND_EDGES >= 48), Depth 3D (red/cyan anaglyph, shift 1% of
+  width). Vintage now shares the sepia helper (identical output).
+- EXIF orientation: new `dot_matrix/image_loader.py` `open_image` (ImageOps.exif_transpose) used by the GUI (load,
+  gallery viewer), batch mode and the web upload. Browser already used createImageBitmap 'from-image'; new
+  `tests/test_browser.py` (Playwright) checks a generated Orientation-6 JPEG decodes upright. Note: current Chrome
+  applies EXIF even with imageOrientation 'none', so that test guards the result, not the option value.
+- FaceGenerator.create_test_face works at any size (margins shrink below 40 px; 40 px and up pixel-identical).
+- Each fix in its own "Fix ..." commit with regression tests. All KIT checks re-run: pytest 30 passed
+  (tests/ + test_patterns.py), screenshots static + local all ok, Python render = browser dot list.
+- Still pre-existing: dot_matrix/gui_main.py is 835 lines (over the 500-line budget; not split here).
