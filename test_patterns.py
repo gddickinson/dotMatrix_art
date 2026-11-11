@@ -169,6 +169,29 @@ def test_mosaic_small_image():
     assert out.size == (15, 15)
 
 
+def test_svg_export_uses_background_color():
+    """Regression: SVG export always painted a white background, ignoring Custom BG."""
+    import tempfile
+
+    converter = AdvancedDotMatrixConverter()
+    img = Image.new("RGB", (40, 40), (128, 128, 128))
+    result = converter.convert_image_advanced(
+        img, 4, 4, (40, 40), custom_background=(10, 20, 30)
+    )
+    with tempfile.NamedTemporaryFile(suffix=".svg", delete=False) as f:
+        svg_path = f.name
+    try:
+        assert AdvancedExporter.export_svg(
+            result, svg_path, converter.get_circle_data(), background_color=(10, 20, 30)
+        )
+        content = open(svg_path).read()
+        assert 'fill="rgb(10,20,30)"' in content.splitlines()[2]
+        assert AdvancedExporter.export_svg(result, svg_path, converter.get_circle_data())
+        assert 'fill="white"' in open(svg_path).read().splitlines()[2]
+    finally:
+        os.unlink(svg_path)
+
+
 if __name__ == "__main__":
     test_all_patterns()
     test_artistic_effects()
@@ -180,4 +203,5 @@ if __name__ == "__main__":
     test_svg_export()
     test_non_rgb_images_convert()
     test_mosaic_small_image()
+    test_svg_export_uses_background_color()
     print("\nAll tests passed!")

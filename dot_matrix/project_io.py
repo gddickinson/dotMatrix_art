@@ -128,16 +128,24 @@ class AdvancedExporter:
 
     @staticmethod
     def export_svg(
-        image: Image.Image, output_path: str, circle_data: List[Dict]
+        image: Image.Image,
+        output_path: str,
+        circle_data: List[Dict],
+        background_color: Optional[Tuple[int, int, int]] = None,
     ) -> bool:
-        """Export as SVG vector format."""
+        """Export as SVG vector format (dots as circles, on the artwork's background)."""
         try:
             width, height = image.size
+            if background_color:
+                r, g, b = (int(c) for c in background_color[:3])
+                bg = f"rgb({r},{g},{b})"
+            else:
+                bg = "white"
 
             svg_content = (
                 f'<?xml version="1.0" encoding="UTF-8"?>\n'
                 f'<svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg">\n'
-                f'<rect width="{width}" height="{height}" fill="white"/>\n'
+                f'<rect width="{width}" height="{height}" fill="{bg}"/>\n'
             )
 
             for circle in circle_data:
