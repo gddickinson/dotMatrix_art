@@ -205,6 +205,24 @@ def test_every_menu_effect_changes_the_image():
         assert not np.array_equal(np.array(out), np.array(img)), f"{effect.value} left the image unchanged"
 
 
+def test_open_image_applies_exif_orientation(tmp_path=None):
+    """Regression: phone photos (EXIF Orientation) were loaded sideways by the desktop app and batch mode."""
+    import tempfile
+    from tests.exif_sample import rotated_jpeg, red_corner_is_top_right
+    from dot_matrix.image_loader import open_image
+
+    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f:
+        f.write(rotated_jpeg())
+        path = f.name
+    try:
+        assert red_corner_is_top_right(open_image(path))
+    finally:
+        os.unlink(path)
+    for module in ("gui_main.py", "batch.py"):
+        src = open(os.path.join(os.path.dirname(__file__), "dot_matrix", module)).read()
+        assert "Image.open(" not in src, f"{module} should load images with open_image"
+
+
 if __name__ == "__main__":
     test_all_patterns()
     test_artistic_effects()
@@ -218,4 +236,5 @@ if __name__ == "__main__":
     test_mosaic_small_image()
     test_svg_export_uses_background_color()
     test_every_menu_effect_changes_the_image()
+    test_open_image_applies_exif_orientation()
     print("\nAll tests passed!")

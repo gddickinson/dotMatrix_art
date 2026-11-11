@@ -150,3 +150,13 @@ def test_convert_with_custom_palette_colours():
     bad = client.post("/api/convert", files={"file": ("t.png", png)},
                       data={"use_palette": "1", "palette_colors": "[[1, 2, 300]]"})
     assert bad.status_code == 400
+
+
+def test_upload_applies_exif_orientation():
+    """Regression: a phone photo with EXIF Orientation is converted the right way up (as browsers show it)."""
+    from dot_matrix.web.convert_api import decode_image
+    from tests.exif_sample import red_corner_is_top_right, rotated_jpeg
+    assert red_corner_is_top_right(decode_image(rotated_jpeg()))
+    r = client.post("/api/convert", files={"file": ("phone.jpg", rotated_jpeg(), "image/jpeg")},
+                    data={"matrix_width": 2, "matrix_height": 4, "output_width": 20, "output_height": 40})
+    assert r.status_code == 200, r.text

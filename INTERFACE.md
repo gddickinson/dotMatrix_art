@@ -14,6 +14,7 @@
 | `effects.py` | Artistic image effects | `ArtisticProcessor`, `FaceGenerator` |
 | `camera.py` | Camera capture and face detection | `FaceDetector`, `CameraCapture`, `CV2_AVAILABLE` |
 | `batch.py` | Batch image processing | `BatchProcessor` |
+| `image_loader.py` | Open images upright (EXIF orientation applied); used by GUI, batch and web | `open_image` |
 | `project_io.py` | Save/load, export, undo, threading | `ProjectManager`, `AdvancedExporter`, `UndoRedoManager`, `ThreadSafeImageProcessor` |
 | `gui_main.py` | Main Tkinter application class | `MasterDotMatrixStudio` |
 | `gui_tabs.py` | Tab setup methods (mixin) | `TabSetupMixin` |
@@ -47,6 +48,8 @@
 ## Tests
 - `test_patterns.py` -- Smoke tests for patterns, effects, palettes, undo/redo, SVG export, non-RGB inputs
 - `tests/test_web.py` -- Web API, static build, fixture currency, and the node JS-engine test
+- `tests/test_browser.py` -- Playwright check that the browser decodes an EXIF-rotated JPEG upright (skipped without Playwright)
+- `tests/exif_sample.py` -- builds the rotated test JPEG used by both
 
 ## Archive
 - `_archive/` -- Old v1 and v2 files

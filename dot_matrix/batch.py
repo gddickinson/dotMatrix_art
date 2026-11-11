@@ -4,9 +4,9 @@ import logging
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Callable
 
-from PIL import Image
 
 from dot_matrix.models import DotPattern, ArtisticEffect, ColorPalette, ProjectSettings
+from dot_matrix.image_loader import open_image
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class BatchProcessor:
                     break
 
                 try:
-                    image = Image.open(image_path)
+                    image = open_image(image_path)
 
                     result = self.converter.convert_image_advanced(
                         image,

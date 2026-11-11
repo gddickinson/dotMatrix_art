@@ -16,6 +16,7 @@ from dot_matrix.models import (
 )
 from dot_matrix.patterns import AdvancedDotMatrixConverter
 from dot_matrix.effects import FaceGenerator
+from dot_matrix.image_loader import open_image
 from dot_matrix.camera import FaceDetector, CameraCapture, CV2_AVAILABLE
 from dot_matrix.batch import BatchProcessor
 from dot_matrix.project_io import (
@@ -123,7 +124,7 @@ class MasterDotMatrixStudio(TabSetupMixin):
         )
         if file_path:
             try:
-                self.current_image = Image.open(file_path)
+                self.current_image = open_image(file_path)
                 self.undo_manager.add_state(self.current_image)
                 filename = os.path.basename(file_path)
                 self.image_info_label.config(
@@ -750,7 +751,7 @@ class MasterDotMatrixStudio(TabSetupMixin):
             images = self.project_manager.get_gallery_images()
             if selection[0] < len(images):
                 image_path = images[selection[0]]
-                image = Image.open(image_path)
+                image = open_image(image_path)
 
                 viewer = tk.Toplevel(self.root)
                 viewer.title(f"Gallery Viewer - {image_path.name}")

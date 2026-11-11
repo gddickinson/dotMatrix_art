@@ -14,9 +14,10 @@ import tempfile
 from dataclasses import fields
 from typing import Optional
 
-from PIL import Image, ImageOps
+from PIL import Image
 
 from dot_matrix.effects import ArtisticProcessor, FaceGenerator
+from dot_matrix.image_loader import open_image
 from dot_matrix.models import ArtisticEffect, ColorPalette, DotPattern, ProjectSettings
 from dot_matrix.patterns import AdvancedDotMatrixConverter
 from dot_matrix.project_io import AdvancedExporter
@@ -74,17 +75,18 @@ def demo() -> dict:
 
 
 def decode_image(data: bytes) -> Image.Image:
-    """Open an uploaded image, upright (EXIF orientation applied, as browsers display it)."""
+    """Open an uploaded image upright (image_loader.open_image: EXIF orientation applied, as browsers display it)."""
     try:
-        img = Image.open(io.BytesIO(data))
-        if img.width * img.height > MAX_PIXELS:
-            raise ValueError(f"Image too large ({img.width}x{img.height}); the web app accepts up to 40 megapixels.")
-        img.load()
-    except ValueError:
-        raise
+        with Image.open(io.BytesIO(data)) as probe:
+            size = probe.size
     except Exception as e:
         raise ValueError(f"Could not read the image: {e}")
-    return ImageOps.exif_transpose(img)
+    if size[0] * size[1] > MAX_PIXELS:
+        raise ValueError(f"Image too large ({size[0]}x{size[1]}); the web app accepts up to 40 megapixels.")
+    try:
+        return open_image(io.BytesIO(data))
+    except Exception as e:
+        raise ValueError(f"Could not read the image: {e}")
 
 
 def _num(params: dict, key: str, default, lo, hi, cast=float):
