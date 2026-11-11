@@ -53,7 +53,7 @@ class ArtisticProcessor:
 
         elif effect == ArtisticEffect.MOSAIC:
             small = image.resize(
-                (image.width // 20, image.height // 20), Image.NEAREST
+                (max(1, image.width // 20), max(1, image.height // 20)), Image.NEAREST
             )
             return small.resize(image.size, Image.NEAREST)
 

@@ -142,6 +142,33 @@ def test_svg_export(tmp_path=None):
     print("PASSED: test_svg_export")
 
 
+def test_non_rgb_images_convert():
+    """Regression: RGBA/L/P/LA images (PNG with alpha, grayscale, GIF) must convert
+    with every effect and with a colour palette (they used to return None)."""
+    converter = AdvancedDotMatrixConverter()
+    palette = ColorPalette.PALETTES["Ocean Blues"]
+    for mode in ["RGBA", "L", "P", "LA"]:
+        img = Image.new(mode, (60, 40))
+        for effect in ArtisticEffect:
+            out = converter.convert_image_advanced(
+                img, 10, 5, (100, 50), artistic_effect=effect,
+                edge_enhancement=True, noise_reduction=True,
+            )
+            assert out is not None, f"{mode} + {effect.value} failed"
+        out = converter.convert_image_advanced(
+            img, 10, 5, (100, 50), use_color=True, color_palette=palette
+        )
+        assert out is not None, f"{mode} + palette failed"
+
+
+def test_mosaic_small_image():
+    """Regression: the mosaic effect crashed on images narrower than 20 px."""
+    out = ArtisticProcessor.apply_artistic_effect(
+        Image.new("RGB", (15, 15), (10, 20, 30)), ArtisticEffect.MOSAIC
+    )
+    assert out.size == (15, 15)
+
+
 if __name__ == "__main__":
     test_all_patterns()
     test_artistic_effects()
@@ -151,4 +178,6 @@ if __name__ == "__main__":
     test_undo_redo_manager()
     test_project_settings_defaults()
     test_svg_export()
+    test_non_rgb_images_convert()
+    test_mosaic_small_image()
     print("\nAll tests passed!")

@@ -46,7 +46,12 @@ class AdvancedDotMatrixConverter:
                 self.logger.info(f"Converting image with pattern: {pattern.value}")
                 self.circle_data = []
 
-                work_image = image.copy()
+                # Normalise to RGB: PNGs with alpha, grayscale and palette (GIF)
+                # images otherwise crash the effects and the palette mapping.
+                if image.mode != "RGB":
+                    work_image = image.convert("RGB")
+                else:
+                    work_image = image.copy()
 
                 if noise_reduction:
                     work_image = work_image.filter(ImageFilter.SMOOTH)
