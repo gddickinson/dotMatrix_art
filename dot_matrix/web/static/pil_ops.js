@@ -84,6 +84,22 @@ export function color(im, factor) { return blend(im.c === 1 ? copyImage(im) : to
 
 export function invert(im) { return makeImage(im.w, im.h, im.c, im.data.map(v => 255 - v)); }
 
+// ImageOps.posterize: keep the top `bits` bits of every channel.
+export function posterize(im, bits) {
+  const mask = ~(2 ** (8 - bits) - 1) & 255;
+  return makeImage(im.w, im.h, im.c, im.data.map(v => v & mask));
+}
+
+// Image.point(lut) for 8-bit images.
+export function point(im, lut) { return makeImage(im.w, im.h, im.c, im.data.map(v => lut[v])); }
+
+// ImageChops.multiply: a * b / 255 in integer arithmetic (Chops.c).
+export function multiply(a, b) {
+  const out = new Uint8Array(a.data.length);
+  for (let i = 0; i < out.length; i++) out[i] = Math.trunc(a.data[i] * b.data[i] / 255);
+  return makeImage(a.w, a.h, a.c, out);
+}
+
 export function lighter(a, b) {
   const out = new Uint8Array(a.data.length);
   for (let i = 0; i < out.length; i++) out[i] = Math.max(a.data[i], b.data[i]);

@@ -5,21 +5,37 @@
 // extractDominantColors() = ColorPalette.extract_dominant_colors.
 import {
   makeImage, toL, toRGB, filter3x3, contrast, color, invert, lighter, gaussianBlur, resample, resizeNearest,
+  posterize, point, multiply,
 } from './pil_ops.js';
 
-// effects.py ArtisticProcessor.apply_artistic_effect. Effects not handled there return the image unchanged.
-export const EFFECTS = {
-  vintage(im) {
-    const c = contrast(im, 0.8), d = c.data, out = new Uint8Array(d.length);
-    const M = [[0.393, 0.769, 0.189], [0.349, 0.686, 0.168], [0.272, 0.534, 0.131]];
-    for (let i = 0; i < d.length; i += 3) {
-      for (let ch = 0; ch < 3; ch++) {
-        const v = d[i] * M[ch][0] + d[i + 1] * M[ch][1] + d[i + 2] * M[ch][2];
-        out[i + ch] = v <= 0 ? 0 : v >= 255 ? 255 : Math.trunc(v);
-      }
+const SEPIA = [[0.393, 0.769, 0.189], [0.349, 0.686, 0.168], [0.272, 0.534, 0.131]];
+export const COMIC_EDGE_THRESHOLD = 48;
+
+// effects.py _sepia: pixels . SEPIA^T, clipped, truncated to uint8.
+function sepia(im) {
+  const d = im.data, out = new Uint8Array(d.length);
+  for (let i = 0; i < d.length; i += 3) {
+    for (let ch = 0; ch < 3; ch++) {
+      const v = d[i] * SEPIA[ch][0] + d[i + 1] * SEPIA[ch][1] + d[i + 2] * SEPIA[ch][2];
+      out[i + ch] = v <= 0 ? 0 : v >= 255 ? 255 : Math.trunc(v);
     }
-    return makeImage(im.w, im.h, 3, out);
-  },
+  }
+  return makeImage(im.w, im.h, 3, out);
+}
+
+// effects.py _shift_columns on every channel: dx[ch] columns to the right (negative = left), edge column repeated.
+function shiftChannels(im, dx) {
+  const { w, h } = im, out = new Uint8Array(im.data.length);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) for (let ch = 0; ch < 3; ch++) {
+    const sx = Math.min(w - 1, Math.max(0, x - dx[ch]));
+    out[(y * w + x) * 3 + ch] = im.data[(y * w + sx) * 3 + ch];
+  }
+  return makeImage(w, h, 3, out);
+}
+
+// effects.py ArtisticProcessor.apply_artistic_effect (every menu effect).
+export const EFFECTS = {
+  vintage: im => sepia(contrast(im, 0.8)),
   neon: im => color(contrast(filter3x3(im, 'EDGE_ENHANCE_MORE'), 1.5), 2.0),
   sketch(im) {
     const gray = toL(im);
@@ -32,6 +48,17 @@ export const EFFECTS = {
     return resizeNearest(small, im.w, im.h);
   },
   emboss: im => filter3x3(im, 'EMBOSS'),
+  sepia: im => sepia(im),
+  watercolor: im => color(posterize(gaussianBlur(im, 2), 4), 1.3),
+  comic(im) {
+    const flat = posterize(filter3x3(im, 'SMOOTH'), 2);
+    const lut = Array.from({ length: 256 }, (_, v) => (v < COMIC_EDGE_THRESHOLD ? 255 : 0));
+    return multiply(flat, toRGB(point(filter3x3(toL(im), 'FIND_EDGES'), lut)));
+  },
+  depth_3d(im) {
+    const s = Math.max(1, Math.floor(im.w / 100));
+    return shiftChannels(im, [-s, s, s]);
+  },
 };
 
 export const isImplemented = effect => effect === 'none' || effect in EFFECTS;

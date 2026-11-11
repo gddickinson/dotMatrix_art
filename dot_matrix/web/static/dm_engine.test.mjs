@@ -33,8 +33,14 @@ function diff(a, b) {
 }
 
 // 1. Effects / preprocessing: full images.
+function tile(im, n) {   // np.tile along x
+  if (!n || n === 1) return im;
+  const out = new Uint8Array(im.data.length * n), row = im.w * 3;
+  for (let y = 0; y < im.h; y++) for (let k = 0; k < n; k++) out.set(im.data.subarray(y * row, (y + 1) * row), (y * n + k) * row);
+  return makeImage(im.w * n, im.h, 3, out);
+}
 for (const c of FIX.effects) {
-  const got = preprocess(img, options(c.params)).data, want = bytes(c.rgb);
+  const got = preprocess(tile(img, c.params.tile), options(c.params)).data, want = bytes(c.rgb);
   const d = diff(got, want);
   check(got.length === want.length && d.max <= PIXEL_TOL, `effect ${JSON.stringify(c.params)}: max diff ${d.max} in ${d.n} values`);
   if (d.n) console.log(`  note: effect ${JSON.stringify(c.params)} differs by ${d.max} in ${d.n}/${want.length} values`);

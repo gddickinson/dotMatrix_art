@@ -45,6 +45,7 @@ def test_image() -> Image.Image:
 EFFECT_CASES = [{"effect": e.value} for e in ArtisticEffect] + [
     {"effect": "none", "noise_reduce": "1"}, {"effect": "none", "edge_enhance": "1"},
     {"effect": "neon", "noise_reduce": "1", "edge_enhance": "1"},
+    {"effect": "depth_3d", "tile": 3},      # 240 px wide: anaglyph shift of 2 px
 ]
 
 MATRIX_CASES = [
@@ -61,6 +62,10 @@ MATRIX_CASES = [
     {"matrix_width": 32, "matrix_height": 24, "effect": "emboss", "noise_reduce": "1"},
     {"matrix_width": 32, "matrix_height": 24, "effect": "crosshatch", "use_palette": "1", "palette": "Fire & Ice"},
     {"matrix_width": 30, "matrix_height": 19, "effect": "neon", "edge_enhance": "1", "animate": "1", "frame": 3},
+    {"matrix_width": 24, "matrix_height": 18, "effect": "comic", "use_palette": "1", "palette": "Pastel Dream"},
+    {"matrix_width": 24, "matrix_height": 18, "effect": "watercolor", "noise_reduce": "1"},
+    {"matrix_width": 24, "matrix_height": 18, "effect": "sepia", "use_palette": "1", "palette": "Vintage Sepia"},
+    {"matrix_width": 24, "matrix_height": 18, "effect": "depth_3d", "animate": "1", "frame": 9},
 ]
 
 
@@ -102,7 +107,8 @@ def main():
     effects = []
     for case in EFFECT_CASES:
         kw = parse_params(case)
-        work = conv.preprocess_image(img, kw["artistic_effect"], kw["edge_enhancement"], kw["noise_reduction"])
+        src = Image.fromarray(np.tile(np.array(img), (1, case.get("tile", 1), 1)), "RGB")
+        work = conv.preprocess_image(src, kw["artistic_effect"], kw["edge_enhancement"], kw["noise_reduction"])
         effects.append({"params": case, "rgb": b64(np.array(work))})
     matrices = []
     for case in MATRIX_CASES:

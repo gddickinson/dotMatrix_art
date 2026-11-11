@@ -192,6 +192,19 @@ def test_svg_export_uses_background_color():
         os.unlink(svg_path)
 
 
+def test_every_menu_effect_changes_the_image():
+    """Regression: Watercolor, Comic, Sepia and Depth 3D were listed in the menu but returned the image unchanged."""
+    import numpy as np
+    rng = np.random.default_rng(0)
+    img = Image.fromarray(rng.integers(0, 256, (40, 60, 3), dtype=np.uint8), "RGB")
+    for effect in ArtisticEffect:
+        if effect is ArtisticEffect.NONE:
+            continue
+        out = ArtisticProcessor.apply_artistic_effect(img, effect)
+        assert out.size == img.size and out.mode == "RGB", effect
+        assert not np.array_equal(np.array(out), np.array(img)), f"{effect.value} left the image unchanged"
+
+
 if __name__ == "__main__":
     test_all_patterns()
     test_artistic_effects()
@@ -204,4 +217,5 @@ if __name__ == "__main__":
     test_non_rgb_images_convert()
     test_mosaic_small_image()
     test_svg_export_uses_background_color()
+    test_every_menu_effect_changes_the_image()
     print("\nAll tests passed!")

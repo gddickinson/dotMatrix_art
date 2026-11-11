@@ -78,8 +78,10 @@ python photo_to_dot_matrix_v3.py
 4. Preview the result in real time
 5. Export the dot matrix art (PNG/JPEG, SVG, high-resolution PNG, animation frames)
 
-Note: the effect menu also lists Watercolor, Comic, Sepia and Depth 3D, which are not implemented yet
-(they leave the image unchanged).
+Artistic effects (applied before sampling): Vintage (softer contrast + sepia), Neon (strong edges, contrast,
+saturation), Watercolor (blur, 16 levels per channel, richer colour), Sketch (colour-dodge style pencil), Comic
+(4-level poster colours with black ink edges), Emboss, Sepia (classic sepia matrix), Crosshatch (edge lines),
+Mosaic (20 px blocks) and Depth 3D (red/cyan anaglyph shift of 1% of the width).
 
 ## Versions
 

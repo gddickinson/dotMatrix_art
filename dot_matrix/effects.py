@@ -18,15 +18,7 @@ class ArtisticProcessor:
         elif effect == ArtisticEffect.VINTAGE:
             enhancer = ImageEnhance.Contrast(image)
             image = enhancer.enhance(0.8)
-            pixels = np.array(image)
-            sepia_filter = np.array([
-                [0.393, 0.769, 0.189],
-                [0.349, 0.686, 0.168],
-                [0.272, 0.534, 0.131],
-            ])
-            sepia_img = pixels.dot(sepia_filter.T)
-            sepia_img = np.clip(sepia_img, 0, 255).astype(np.uint8)
-            return Image.fromarray(sepia_img)
+            return Image.fromarray(_sepia(np.array(image)))
 
         elif effect == ArtisticEffect.NEON:
             image = image.filter(ImageFilter.EDGE_ENHANCE_MORE)
@@ -60,8 +52,55 @@ class ArtisticProcessor:
         elif effect == ArtisticEffect.EMBOSS:
             return image.filter(ImageFilter.EMBOSS)
 
+        elif effect == ArtisticEffect.SEPIA:
+            # Classic sepia tone matrix (as Vintage, without the contrast reduction)
+            return Image.fromarray(_sepia(np.array(image.convert("RGB"))))
+
+        elif effect == ArtisticEffect.WATERCOLOR:
+            # Soft washes: blur, flatten to 16 levels per channel, then richer colour
+            soft = image.convert("RGB").filter(ImageFilter.GaussianBlur(radius=2))
+            washes = ImageOps.posterize(soft, 4)
+            return ImageEnhance.Color(washes).enhance(1.3)
+
+        elif effect == ArtisticEffect.COMIC:
+            # Flat poster colours with black ink lines where edges are strong
+            rgb = image.convert("RGB")
+            flat = ImageOps.posterize(rgb.filter(ImageFilter.SMOOTH), 2)
+            edges = rgb.convert("L").filter(ImageFilter.FIND_EDGES)
+            ink = edges.point([255 if v < COMIC_EDGE_THRESHOLD else 0 for v in range(256)])
+            return ImageChops.multiply(flat, ink.convert("RGB"))
+
+        elif effect == ArtisticEffect.DEPTH_3D:
+            # Red/cyan anaglyph: red channel shifted left, green and blue shifted right
+            arr = np.array(image.convert("RGB"))
+            shift = max(1, arr.shape[1] // 100)
+            out = arr.copy()
+            out[:, :, 0] = _shift_columns(arr[:, :, 0], -shift)
+            out[:, :, 1] = _shift_columns(arr[:, :, 1], shift)
+            out[:, :, 2] = _shift_columns(arr[:, :, 2], shift)
+            return Image.fromarray(out)
+
         else:
             return image
+
+
+COMIC_EDGE_THRESHOLD = 48
+SEPIA_MATRIX = np.array([
+    [0.393, 0.769, 0.189],
+    [0.349, 0.686, 0.168],
+    [0.272, 0.534, 0.131],
+])
+
+
+def _sepia(pixels: np.ndarray) -> np.ndarray:
+    return np.clip(pixels.dot(SEPIA_MATRIX.T), 0, 255).astype(np.uint8)
+
+
+def _shift_columns(channel: np.ndarray, dx: int) -> np.ndarray:
+    """Shift a 2-D channel by dx columns (positive = right), repeating the edge column."""
+    w = channel.shape[1]
+    src = np.clip(np.arange(w) - dx, 0, w - 1)
+    return channel[:, src]
 
 
 class FaceGenerator:
