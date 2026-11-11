@@ -46,38 +46,12 @@ class AdvancedDotMatrixConverter:
                 self.logger.info(f"Converting image with pattern: {pattern.value}")
                 self.circle_data = []
 
-                # Normalise to RGB: PNGs with alpha, grayscale and palette (GIF)
-                # images otherwise crash the effects and the palette mapping.
-                if image.mode != "RGB":
-                    work_image = image.convert("RGB")
-                else:
-                    work_image = image.copy()
-
-                if noise_reduction:
-                    work_image = work_image.filter(ImageFilter.SMOOTH)
-                if edge_enhancement:
-                    work_image = work_image.filter(ImageFilter.EDGE_ENHANCE)
-                if artistic_effect != ArtisticEffect.NONE:
-                    work_image = ArtisticProcessor.apply_artistic_effect(
-                        work_image, artistic_effect
-                    )
-
-                if use_color and color_palette:
-                    img_resized = work_image.resize(
-                        (matrix_width, matrix_height), Image.LANCZOS
-                    )
-                    img_gray = img_resized.convert("L")
-                    pixel_brightness = np.array(img_gray)
-                    pixel_colors = self._map_to_palette(
-                        np.array(img_resized), color_palette
-                    )
-                else:
-                    img_gray = work_image.convert("L")
-                    img_resized = img_gray.resize(
-                        (matrix_width, matrix_height), Image.LANCZOS
-                    )
-                    pixel_brightness = np.array(img_resized)
-                    pixel_colors = None
+                work_image = self.preprocess_image(
+                    image, artistic_effect, edge_enhancement, noise_reduction
+                )
+                pixel_brightness, pixel_colors = self.sample_matrix(
+                    work_image, matrix_width, matrix_height, use_color, color_palette
+                )
 
                 bg_color = custom_background if custom_background else (255, 255, 255)
                 output_img = Image.new("RGB", output_size, bg_color)
@@ -122,6 +96,50 @@ class AdvancedDotMatrixConverter:
             except Exception as e:
                 self.logger.error(f"Advanced conversion failed: {e}")
                 return None
+
+    @staticmethod
+    def preprocess_image(
+        image: Image.Image,
+        artistic_effect: ArtisticEffect = ArtisticEffect.NONE,
+        edge_enhancement: bool = False,
+        noise_reduction: bool = False,
+    ) -> Image.Image:
+        """Noise reduction, edge enhancement and artistic effect, in that order (RGB in/out)."""
+        # Normalise to RGB: PNGs with alpha, grayscale and palette (GIF)
+        # images otherwise crash the effects and the palette mapping.
+        if image.mode != "RGB":
+            work_image = image.convert("RGB")
+        else:
+            work_image = image.copy()
+
+        if noise_reduction:
+            work_image = work_image.filter(ImageFilter.SMOOTH)
+        if edge_enhancement:
+            work_image = work_image.filter(ImageFilter.EDGE_ENHANCE)
+        if artistic_effect != ArtisticEffect.NONE:
+            work_image = ArtisticProcessor.apply_artistic_effect(work_image, artistic_effect)
+        return work_image
+
+    def sample_matrix(
+        self,
+        work_image: Image.Image,
+        matrix_width: int,
+        matrix_height: int,
+        use_color: bool = False,
+        color_palette: Optional[List] = None,
+    ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        """Brightness (matrix_height x matrix_width, uint8) and palette colours (or None)."""
+        if use_color and color_palette:
+            img_resized = work_image.resize((matrix_width, matrix_height), Image.LANCZOS)
+            img_gray = img_resized.convert("L")
+            pixel_brightness = np.array(img_gray)
+            pixel_colors = self._map_to_palette(np.array(img_resized), color_palette)
+        else:
+            img_gray = work_image.convert("L")
+            img_resized = img_gray.resize((matrix_width, matrix_height), Image.LANCZOS)
+            pixel_brightness = np.array(img_resized)
+            pixel_colors = None
+        return pixel_brightness, pixel_colors
 
     def get_circle_data(self) -> List[Dict]:
         """Get circle data for SVG export."""

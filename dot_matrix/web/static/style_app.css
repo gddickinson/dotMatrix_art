@@ -1,0 +1,22 @@
+/* Dot Matrix Art: amber LED accent, magenta and cyan secondaries. */
+:root { --accent:#ffb000; --accent2:#ff3fa4; --accent3:#36d6ff; --glow:rgba(255,176,0,.14); }
+.mark { border-radius:50%; border:0; background:radial-gradient(circle, var(--accent) 0 3px, transparent 3.5px) 0 0/8px 8px;
+  box-shadow:0 0 10px var(--glow); }
+.preview { background:#000; border:1px solid var(--line); border-radius:6px; padding:8px; overflow:auto; max-height:78vh; }
+.preview canvas, .preview img { display:block; max-width:100%; height:auto; margin:0 auto; image-rendering:auto; }
+.studio { display:grid; grid-template-columns:330px minmax(0,1fr); gap:18px; align-items:start; }
+.studio .panel { margin:0 0 12px; padding:14px 16px; }
+.studio .panel h3 { margin-top:0; }
+.pair { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.check { display:flex; align-items:center; gap:8px; margin:8px 0; color:var(--ink); font-size:14px; }
+.check input { margin:0; }
+.swatches { display:flex; flex-wrap:wrap; gap:3px; margin:6px 0; }
+.swatches i { width:18px; height:18px; border-radius:50%; border:1px solid rgba(255,255,255,.25); display:inline-block; }
+.status { min-height:1.4em; }
+.thumbs { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; }
+.thumbs a.card { padding:10px; }
+.thumbs canvas { width:100%; height:auto; display:block; border-radius:4px; background:#fff; }
+.pybox { margin-top:14px; }
+.pybox img { max-width:100%; height:auto; display:block; margin:8px auto 0; background:#fff; }
+input[type=color] { height:36px; padding:2px; }
+@media (max-width:860px) { .studio { grid-template-columns:1fr; } }

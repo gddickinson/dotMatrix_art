@@ -15,6 +15,39 @@ A photo-to-dot-matrix converter with a full-featured Tkinter GUI. Transform any 
 - **Project save/load** via JSON
 - **Multi-threaded** processing for responsive UI
 
+## Web app and static site
+
+Try it in the browser: **https://gddickinson.github.io/dotMatrix_art/** (static site, published from `main` by
+`.github/workflows/pages.yml`). Pick your own photo: the conversion runs in your browser with a JavaScript port of the
+Python converter, and the image is never uploaded. Every option of the desktop app is there (matrix and output size,
+spacing, 11 patterns, effects, edge enhancement, noise reduction, palettes including "extract from image", custom
+background, animation) with PNG and SVG downloads.
+
+| Home | Studio | Patterns |
+|---|---|---|
+| ![Home](docs/img/home.png) | ![Studio](docs/img/studio.png) | ![Patterns](docs/img/gallery.png) |
+
+### Run the web app
+
+```bash
+pip install -r requirements-web.txt
+python run_web.py            # http://127.0.0.1:8157
+```
+
+The local app has the same pages plus **Render with Python**, which sends the image to the local server and runs the
+repo's own `AdvancedDotMatrixConverter` (PNG and the desktop SVG export come back).
+
+How the JS port was checked: `scripts/make_dm_fixture.py` runs the Python on a generated test image and writes
+`tests/fixtures/dm_fixture.json`; `dot_matrix/web/static/dm_engine.test.mjs` (node) runs the port on the same pixels.
+Effect images, brightness matrices, palette colours, the dot list, the SVG export text and the shape geometry agree
+exactly. Drawn PNGs differ slightly: browsers anti-alias, Pillow does not, and stipple uses a different random
+generator.
+
+```bash
+python -m pytest -q tests/test_web.py test_patterns.py    # includes the node test
+python scripts/build_static.py                             # static site -> site/
+```
+
 ## Requirements
 
 - Python 3.7+

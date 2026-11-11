@@ -13,7 +13,7 @@ A photo-to-dot-matrix converter with three version files totaling ~4,170 lines. 
 - [x] Add unit tests for pattern generation (circle, square, diamond, etc.) — these are deterministic and testable
 
 ## Feature Enhancements
-- [ ] Add SVG export support — dot matrix art is inherently vector-friendly
+- [x] Add SVG export support — dot matrix art is inherently vector-friendly (desktop: circles only; web also exports pattern shapes)
 - [ ] Add color palette modes: monochrome, duotone, full-color, custom palette
 - [ ] Add dithering algorithms (Floyd-Steinberg, Atkinson) as alternative to simple thresholding
 - [ ] Add preview at multiple resolutions simultaneously (thumbnail grid)
@@ -23,7 +23,7 @@ A photo-to-dot-matrix converter with three version files totaling ~4,170 lines. 
 - [ ] Add a "randomize" button that generates interesting parameter combinations
 
 ## Long-term Vision
-- [ ] Create a web version using Flask/FastAPI + HTML5 Canvas for broader accessibility
+- [x] Create a web version using Flask/FastAPI + HTML5 Canvas for broader accessibility (`dot_matrix/web/`, static site on GitHub Pages)
 - [ ] Add video-to-dot-matrix mode — process video frames and export as animated GIF or MP4
 - [ ] Add AI-powered auto-parameter selection based on image content (portraits vs landscapes vs text)
 - [ ] Publish as a pip-installable CLI tool: `dotmatrix convert --pattern hexagon input.jpg output.png`
