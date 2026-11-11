@@ -223,6 +223,16 @@ def test_open_image_applies_exif_orientation(tmp_path=None):
         assert "Image.open(" not in src, f"{module} should load images with open_image"
 
 
+def test_face_generator_small_sizes():
+    """Regression: create_test_face raised ValueError for sizes below about 40 px."""
+    import numpy as np
+    for w, h in [(1, 1), (2, 2), (5, 7), (16, 16), (39, 48), (60, 20), (20, 60)]:
+        face = FaceGenerator.create_test_face(w, h)
+        assert face.size == (w, h)
+    default = FaceGenerator.create_test_face()
+    assert len(np.unique(np.array(default).reshape(-1, 3), axis=0)) > 3
+
+
 if __name__ == "__main__":
     test_all_patterns()
     test_artistic_effects()
@@ -237,4 +247,5 @@ if __name__ == "__main__":
     test_svg_export_uses_background_color()
     test_every_menu_effect_changes_the_image()
     test_open_image_applies_exif_orientation()
+    test_face_generator_small_sizes()
     print("\nAll tests passed!")

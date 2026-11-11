@@ -112,8 +112,10 @@ class FaceGenerator:
         img = Image.new("RGB", (width, height), (245, 220, 177))
         draw = ImageDraw.Draw(img)
 
-        # Face outline
-        face_margin = 20
+        # Face outline (margins shrink for images under 40 px so every box stays valid;
+        # the default 200 x 240 face is unchanged)
+        face_margin = min(20, width // 2, height // 2)
+        hair_pad = min(10, face_margin // 2)
         draw.ellipse(
             [face_margin, face_margin, width - face_margin, height - face_margin],
             fill=(235, 210, 167),
@@ -122,9 +124,10 @@ class FaceGenerator:
         )
 
         # Hair
-        hair_height = height // 3
+        hair_top = face_margin - hair_pad
+        hair_height = max(height // 3, hair_top)
         draw.ellipse(
-            [face_margin - 10, face_margin - 10, width - face_margin + 10, hair_height],
+            [hair_top, hair_top, width - face_margin + hair_pad, hair_height],
             fill=(101, 67, 33),
         )
 
