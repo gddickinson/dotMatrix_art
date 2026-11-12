@@ -1,7 +1,8 @@
 // Dot shapes of patterns.py (_draw_circle ... _draw_ascii_dot) as drawing primitives, plus canvas and SVG output.
 // shapePrimitives() returns the same ellipse/rectangle/polygon/text calls the Python makes on ImageDraw (tested in
-// dm_engine.test.mjs). svgCircles() reproduces AdvancedExporter.export_svg byte for byte; svgShapes() is a web-only
-// extra that writes the chosen shapes instead of circles.
+// dm_engine.test.mjs). svgShapes() reproduces the desktop SVG export (AdvancedExporter.export_svg with the pattern,
+// dot_matrix/svg_export.py) byte for byte except for stipple's random scatter; svgCircles() reproduces the
+// circles-only format (export_svg without a pattern).
 
 const rad = d => d * (Math.PI / 180);   // math.radians
 
@@ -88,14 +89,14 @@ function svgHead(outW, outH, background) {
     + `<rect width="${outW}" height="${outH}" fill="${bg}"/>\n`;
 }
 
-// AdvancedExporter.export_svg: every dot as a <circle>, whatever the pattern.
+// svg_export.circles_svg: every dot as a full-precision <circle>, whatever the pattern.
 export function svgCircles(dots, outW, outH, background = null) {
   let s = svgHead(outW, outH, background);
   for (const d of dots) s += `<circle cx="${pyFloat(d.x)}" cy="${pyFloat(d.y)}" r="${pyFloat(d.r)}" fill="${cssColor(d.color)}"/>\n`;
   return s + '</svg>';
 }
 
-// Web extra: the chosen pattern's shapes as SVG elements.
+// The chosen pattern's shapes as SVG elements (svg_export.shapes_svg; numbers as String(+v.toFixed(3))).
 export function svgShapes(dots, { pattern, outW, outH, background = null, seed = 1 }) {
   const rand = rng(seed), f = v => +v.toFixed(3);
   let s = svgHead(outW, outH, background);

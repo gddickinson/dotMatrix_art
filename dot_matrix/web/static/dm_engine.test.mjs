@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { makeImage } from './pil_ops.js';
 import { preprocess, sampleMatrix, computeDots, extractDominantColors } from './dm_engine.js';
-import { shapePrimitives, svgCircles, hexToRgb } from './dm_shapes.js';
+import { shapePrimitives, svgCircles, svgShapes, hexToRgb } from './dm_shapes.js';
 
 const FIX = JSON.parse(readFileSync(fileURLToPath(new URL('../../../tests/fixtures/dm_fixture.json', import.meta.url)), 'utf8'));
 const bytes = s => new Uint8Array(Buffer.from(s, 'base64'));
@@ -93,7 +93,15 @@ for (const s of FIX.shapes) {
 }
 check(worstShape < 1e-9, `shape coordinates worst diff ${worstShape}`);
 
-// 4. Dominant colours.
+// 4. SVG with pattern shapes: byte-identical to the desktop export (AdvancedExporter.export_svg with a pattern).
+for (const c of FIX.svg_shapes) {
+  const o = options(c.params);
+  const m = sampleMatrix(preprocess(img, o), o.mw, o.mh, o.usePalette ? o.palette : null);
+  const svg = svgShapes(computeDots(m, o), { ...o, pattern: c.params.pattern });
+  check(svg === c.svg, `shape SVG differs for ${c.params.pattern}`);
+}
+
+// 5. Dominant colours.
 const dom = extractDominantColors(img, 6);
 check(JSON.stringify(dom) === JSON.stringify(FIX.dominant), `dominant colours ${JSON.stringify(dom)} vs ${JSON.stringify(FIX.dominant)}`);
 

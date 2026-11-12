@@ -62,10 +62,10 @@ route('studio', async (args, query) => {
       <p id="status" class="small status" role="status"></p>
       <div class="panel"><h3>Download</h3>
         <button id="d-png" type="button">PNG</button><button id="d-png4" class="alt" type="button">PNG ×4 (print)</button>
-        <button id="d-svg" class="alt" type="button">SVG (circles, as the desktop app)</button>
         <button id="d-svgs" class="alt" type="button">SVG (pattern shapes)</button>
+        <button id="d-svg" class="alt" type="button">SVG (circles only)</button>
         <button id="b-seed" class="alt" type="button">New stipple scatter</button>
-        <p class="small mute">The desktop app's SVG export writes every dot as a circle; "pattern shapes" is a web extra.
+        <p class="small mute">"Pattern shapes" is the same file the desktop app's Export SVG writes; "circles only" draws every dot as a circle.
           Browser PNGs are anti-aliased, Pillow's are not, so edges look slightly softer.</p></div>
       <div class="panel pybox"><h3>Python converter</h3>${isStatic() ? needsServer('Rendering with the real Python converter')
         : '<button id="b-py" type="button">Render with Python</button> <span id="py-status" class="small" role="status"></span><div id="py-out"></div>'}</div>

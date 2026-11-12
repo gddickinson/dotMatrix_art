@@ -13,6 +13,7 @@ from typing import Optional, Tuple, List, Dict
 from PIL import Image
 
 from dot_matrix.models import ProjectSettings
+from dot_matrix.svg_export import circles_svg, shapes_svg
 
 logger = logging.getLogger(__name__)
 
@@ -132,31 +133,19 @@ class AdvancedExporter:
         output_path: str,
         circle_data: List[Dict],
         background_color: Optional[Tuple[int, int, int]] = None,
+        pattern=None,
     ) -> bool:
-        """Export as SVG vector format (dots as circles, on the artwork's background)."""
+        """Export as SVG vector format on the artwork's background.
+
+        With a pattern (DotPattern) every dot is drawn with that pattern's shapes (see svg_export.shapes_svg);
+        without one, every dot is written as a full-precision <circle> (the original format).
+        """
         try:
             width, height = image.size
-            if background_color:
-                r, g, b = (int(c) for c in background_color[:3])
-                bg = f"rgb({r},{g},{b})"
+            if pattern is None:
+                svg_content = circles_svg(width, height, circle_data, background_color)
             else:
-                bg = "white"
-
-            svg_content = (
-                f'<?xml version="1.0" encoding="UTF-8"?>\n'
-                f'<svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg">\n'
-                f'<rect width="{width}" height="{height}" fill="{bg}"/>\n'
-            )
-
-            for circle in circle_data:
-                x, y, r, color = circle["x"], circle["y"], circle["r"], circle["color"]
-                if isinstance(color, tuple):
-                    color_str = f"rgb({color[0]},{color[1]},{color[2]})"
-                else:
-                    color_str = color
-                svg_content += f'<circle cx="{x}" cy="{y}" r="{r}" fill="{color_str}"/>\n'
-
-            svg_content += "</svg>"
+                svg_content = shapes_svg(width, height, circle_data, pattern, background_color)
 
             with open(output_path, "w") as f:
                 f.write(svg_content)

@@ -233,6 +233,38 @@ def test_face_generator_small_sizes():
     assert len(np.unique(np.array(default).reshape(-1, 3), axis=0)) > 3
 
 
+def test_svg_export_draws_selected_pattern():
+    """Regression: SVG export wrote circles whatever pattern was selected (stars, hearts... came out as circles)."""
+    import tempfile
+
+    converter = AdvancedDotMatrixConverter()
+    img = Image.new("RGB", (40, 40), (60, 60, 60))
+    expected = {DotPattern.SQUARE: "<rect x=", DotPattern.STAR: "<polygon", DotPattern.HEART: "<polygon",
+                DotPattern.CROSS: "<rect x=", DotPattern.ASCII_DOT: "<text", DotPattern.CIRCLE: "<circle"}
+    with tempfile.NamedTemporaryFile(suffix=".svg", delete=False) as f:
+        svg_path = f.name
+    try:
+        for pattern, tag in expected.items():
+            result = converter.convert_image_advanced(img, 4, 4, (80, 80), pattern=pattern)
+            assert converter.pattern_used is pattern
+            assert AdvancedExporter.export_svg(
+                result, svg_path, converter.get_circle_data(), pattern=converter.pattern_used
+            )
+            body = open(svg_path).read().splitlines()[3:-1]
+            assert body and all(line.startswith(tag) for line in body), (pattern, body[:2])
+    finally:
+        os.unlink(svg_path)
+
+
+def test_svg_number_matches_javascript_tofixed():
+    """svg_number must equal JS String(+v.toFixed(3)) so desktop and web SVGs are byte-identical."""
+    from dot_matrix.svg_export import svg_number
+    js = {0.0625: "0.063", -0.0625: "-0.063", 10.0: "10", -0.0004: "0", 2.5: "2.5", 1 / 3: "0.333",
+          123.4565: "123.457", 1e-7: "0", -1e-7: "0"}  # values printed by node
+    for v, want in js.items():
+        assert svg_number(v) == want, (v, svg_number(v), want)
+
+
 if __name__ == "__main__":
     test_all_patterns()
     test_artistic_effects()
@@ -248,4 +280,6 @@ if __name__ == "__main__":
     test_every_menu_effect_changes_the_image()
     test_open_image_applies_exif_orientation()
     test_face_generator_small_sizes()
+    test_svg_export_draws_selected_pattern()
+    test_svg_number_matches_javascript_tofixed()
     print("\nAll tests passed!")

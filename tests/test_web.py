@@ -138,6 +138,30 @@ def test_fixture_is_current(tmp_path, monkeypatch):
     for a, b in zip(new["shapes"], FIXTURE["shapes"]):
         assert [c["t"] for c in a["calls"]] == [c["t"] for c in b["calls"]]
     assert new["dominant"] == FIXTURE["dominant"]
+    for a, b in zip(new["svg_shapes"], FIXTURE["svg_shapes"]):
+        _assert_svg_close(a["svg"], b["svg"])
+
+
+def _assert_svg_close(a: str, b: str, tol: float = 0.0015):
+    """Same SVG up to the last printed digit (libm differs between platforms)."""
+    import re
+    num = re.compile(r"-?\d+(?:\.\d+)?")
+    la, lb = a.splitlines(), b.splitlines()
+    assert len(la) == len(lb)
+    for x, y in zip(la, lb):
+        assert num.sub("#", x) == num.sub("#", y), (x, y)
+        for u, v in zip(num.findall(x), num.findall(y)):
+            assert abs(float(u) - float(v)) <= tol, (x, y)
+
+
+def test_convert_svg_draws_pattern_shapes():
+    """POST /api/convert returns the desktop SVG export, now with the pattern's shapes (same as the web svgShapes)."""
+    raw = np.frombuffer(base64.b64decode(FIXTURE["image"]["rgb"]), np.uint8)
+    img = Image.fromarray(raw.reshape(FIXTURE["image"]["h"], FIXTURE["image"]["w"], 3), "RGB")
+    for case in FIXTURE["svg_shapes"]:
+        r = client.post("/api/convert", files={"file": ("t.png", _png(img), "image/png")}, data=case["params"])
+        assert r.status_code == 200, r.text
+        _assert_svg_close(r.json()["svg"], case["svg"])
 
 
 def test_convert_with_custom_palette_colours():

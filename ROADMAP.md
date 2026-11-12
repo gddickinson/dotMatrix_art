@@ -13,7 +13,7 @@ A photo-to-dot-matrix converter with three version files totaling ~4,170 lines. 
 - [x] Add unit tests for pattern generation (circle, square, diamond, etc.) — these are deterministic and testable
 
 ## Feature Enhancements
-- [x] Add SVG export support — dot matrix art is inherently vector-friendly (desktop: circles only; web also exports pattern shapes)
+- [x] Add SVG export support — dot matrix art is inherently vector-friendly (desktop and web draw the selected pattern's shapes; circles-only also in the web app)
 - [ ] Add color palette modes: monochrome, duotone, full-color, custom palette
 - [ ] Add dithering algorithms (Floyd-Steinberg, Atkinson) as alternative to simple thresholding
 - [ ] Add preview at multiple resolutions simultaneously (thumbnail grid)

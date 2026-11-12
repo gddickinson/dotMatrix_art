@@ -547,7 +547,8 @@ class MasterDotMatrixStudio(TabSetupMixin):
             try:
                 circle_data = self.converter.get_circle_data()
                 success = AdvancedExporter.export_svg(
-                    self.current_result, file_path, circle_data, background_color=self.bg_color
+                    self.current_result, file_path, circle_data, background_color=self.bg_color,
+                    pattern=self.converter.pattern_used,
                 )
                 if success:
                     self.update_status(f"SVG exported: {os.path.basename(file_path)}")

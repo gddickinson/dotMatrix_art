@@ -14,6 +14,7 @@
 | `effects.py` | Artistic image effects | `ArtisticProcessor`, `FaceGenerator` |
 | `camera.py` | Camera capture and face detection | `FaceDetector`, `CameraCapture`, `CV2_AVAILABLE` |
 | `batch.py` | Batch image processing | `BatchProcessor` |
+| `svg_export.py` | SVG text: pattern shapes (byte-identical to the web) or circles only | `shapes_svg`, `circles_svg`, `svg_number`, `ShapeRecorder` |
 | `image_loader.py` | Open images upright (EXIF orientation applied); used by GUI, batch and web | `open_image` |
 | `project_io.py` | Save/load, export, undo, threading | `ProjectManager`, `AdvancedExporter`, `UndoRedoManager`, `ThreadSafeImageProcessor` |
 | `gui_main.py` | Main Tkinter application class | `MasterDotMatrixStudio` |
@@ -33,7 +34,7 @@
 | `web/static/index.html`, `style.css`, `style_app.css`, `core.js`, `main.js` | Page shell, shared kit theme + project colours, router, entry point |
 | `web/static/pil_ops.js` | JS port of the Pillow ops used (RGB->L, 3x3 filters, blend/enhance, Gaussian blur, posterize, point, multiply, LANCZOS/BICUBIC/NEAREST resize) |
 | `web/static/dm_engine.js` | JS port of preprocess/effects, `sampleMatrix`, `computeDots`, `extractDominantColors` |
-| `web/static/dm_shapes.js` | Pattern shapes as draw primitives, canvas drawing, SVG (desktop circle format + shapes) |
+| `web/static/dm_shapes.js` | Pattern shapes as draw primitives, canvas drawing, SVG (pattern shapes as the desktop export, circles only) |
 | `web/static/dm_engine.test.mjs` | Node test: JS port vs `tests/fixtures/dm_fixture.json` |
 | `web/static/studio.js`, `studio_render.js` | Studio page (UI) and its cached pipeline, downloads, Python render call |
 | `web/static/home.js`, `gallery.js`, `about.js` | Other pages |
@@ -60,6 +61,6 @@ app.py --> gui_main.py --> gui_tabs.py, gui_display.py
                        --> patterns.py --> effects.py --> models.py
                        --> camera.py --> models.py
                        --> batch.py --> models.py
-                       --> project_io.py --> models.py
+                       --> project_io.py --> models.py, svg_export.py (--> patterns.py)
 run_web.py --> web/app.py --> web/convert_api.py --> patterns.py, effects.py, models.py, project_io.py
 ```

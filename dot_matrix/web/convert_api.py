@@ -160,12 +160,12 @@ def parse_params(params: dict) -> dict:
     )
 
 
-def svg_text(result: Image.Image, circle_data: list, background) -> str:
-    """The desktop app's SVG export (AdvancedExporter.export_svg) as a string."""
+def svg_text(result: Image.Image, circle_data: list, background, pattern=None) -> str:
+    """The desktop app's SVG export (AdvancedExporter.export_svg) as a string: pattern shapes, or circles if None."""
     fd, path = tempfile.mkstemp(suffix=".svg")
     os.close(fd)
     try:
-        if not AdvancedExporter.export_svg(result, path, circle_data, background_color=background):
+        if not AdvancedExporter.export_svg(result, path, circle_data, background_color=background, pattern=pattern):
             raise ValueError("SVG export failed")
         with open(path) as f:
             return f.read()
@@ -189,7 +189,7 @@ def convert(image: Image.Image, params: dict, seed: Optional[int] = None) -> dic
     dots = conv.get_circle_data()
     return {
         "width": result.width, "height": result.height, "png": png_data_url(result),
-        "svg": svg_text(result, dots, kw["custom_background"]),
+        "svg": svg_text(result, dots, kw["custom_background"], kw["pattern"]),
         "dots": [{"x": d["x"], "y": d["y"], "r": float(d["r"]), "color": _color_json(d["color"])} for d in dots],
     }
 

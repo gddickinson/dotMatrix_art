@@ -22,6 +22,7 @@ class AdvancedDotMatrixConverter:
         self.logger = logger
         self.conversion_lock = threading.Lock()
         self.circle_data: List[Dict] = []
+        self.pattern_used: DotPattern = DotPattern.CIRCLE  # pattern of the last conversion (for SVG export)
 
     def convert_image_advanced(
         self,
@@ -45,6 +46,7 @@ class AdvancedDotMatrixConverter:
             try:
                 self.logger.info(f"Converting image with pattern: {pattern.value}")
                 self.circle_data = []
+                self.pattern_used = pattern
 
                 work_image = self.preprocess_image(
                     image, artistic_effect, edge_enhancement, noise_reduction
