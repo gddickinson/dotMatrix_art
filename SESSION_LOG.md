@@ -35,3 +35,11 @@
 - Each fix in its own "Fix ..." commit with regression tests. All KIT checks re-run: pytest 30 passed
   (tests/ + test_patterns.py), screenshots static + local all ok, Python render = browser dot list.
 - Still pre-existing: dot_matrix/gui_main.py is 835 lines (over the 500-line budget; not split here).
+
+## 2026-11-11 (later): desktop SVG export draws the selected pattern
+- Fixed: Export SVG wrote circles whatever the pattern. New `dot_matrix/svg_export.py` (shapes recorded from the
+  converter's own `_draw_pattern`; numbers formatted like JS `String(+v.toFixed(3))`); `export_svg(..., pattern=)`,
+  converter records `pattern_used`, GUI passes it. Circles-only format kept when no pattern is given.
+- Byte-identical to the web's "SVG (pattern shapes)" for all patterns except stipple (fixture `svg_shapes`, node
+  test 4573/4573). Web studio buttons relabelled; local "Python SVG" is now the shapes export.
+- KIT checks re-run: pytest tests/ + test_patterns.py 33 passed; screenshots static and local all ok.
